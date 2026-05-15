@@ -1,28 +1,6 @@
 
 const fetch = require("node-fetch");
 
-// ============================================================
-// llmService.js — CHANGED: Replaced hardcoded fake responses
-//                 with real Ollama API calls.
-//
-// HOW OLLAMA WORKS (no API key needed!):
-//   Ollama runs entirely on your local machine.
-//   1. Install Ollama: https://ollama.com/download
-//   2. Pull a model:   ollama pull llama3.2
-//   3. Start Ollama:   ollama serve   (runs at http://localhost:11434)
-//   4. Start this app: npm start
-// EXPORTS:
-//   generateLLMResponse(prompt)
-//     → Used for all normal chat. Routes to llama3.2.
-//
-//   generateCodeModification(instruction, fileContents, filePath)
-//     → Used for self-modification requests. Routes to deepseek-coder
-//       with the Constitution as a system prompt.
-// ============================================================
- 
-// ── Model configuration ───────────────────────────────────────────────────────
-// Both models run locally through Ollama — no API keys needed.
-//
 // CHAT MODEL (llama3.2):
 //   Used for all normal conversation responses. Fast and lightweight.
 //   Pull it with: ollama pull llama3.2
