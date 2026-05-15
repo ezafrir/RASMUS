@@ -1,5 +1,3 @@
-
-// This is DeepSeek- I'm alive!
 // ─── DOM refs ────────────────────────────────────────────────────────────────
 const chatList            = document.getElementById("chatList");
 const bookmarkList        = document.getElementById("bookmarkList");
@@ -15,12 +13,10 @@ const sendBtn             = document.getElementById("sendBtn");
 const shortenToggle       = document.getElementById("shortenToggle");
 const wordLimit           = document.getElementById("wordLimit");
 const saveSettingsBtn     = document.getElementById("saveSettingsBtn");
-const logoutBtn           = document.getElementById("logoutBtn");
-const userInfo            = document.getElementById("userInfo");
 const newChatBtn          = document.getElementById("newChatBtn");
 const mainHeading         = document.getElementById("mainHeading");
 
-// Search modal refs (Change #4)
+// Search modal refs
 const openSearchBtn    = document.getElementById("openSearchBtn");
 const searchOverlay    = document.getElementById("searchOverlay");
 const closeSearchBtn   = document.getElementById("closeSearchBtn");
@@ -31,14 +27,6 @@ const searchResults    = document.getElementById("searchResults");
 
 // ─── State ───────────────────────────────────────────────────────────────────
 let activeConversationId = null;
-
-// ─── Auth ────────────────────────────────────────────────────────────────────
-async function checkAuth() {
-  const res  = await fetch("/api/me");
-  const data = await res.json();
-  if (!data.loggedIn) { window.location.href = "/"; return; }
-  if (userInfo) userInfo.textContent = `Logged in as ${data.user.username}`;
-}
 
 // ─── Sidebar: load conversations ─────────────────────────────────────────────
 async function loadConversations() {
@@ -229,7 +217,7 @@ function renderThread(conversation) {
     const bubble = document.createElement("div");
     bubble.className = `message-bubble ${msg.role === "user" ? "user-bubble" : "assistant-bubble"}`;
     bubble.innerHTML = `
-      <span class="bubble-label">${msg.role === "user" ? "You" : "PistachioAI"}</span>
+      <span class="bubble-label">${msg.role === "user" ? "You" : "RASMUS"}</span>
       <p>${escapeHtml(msg.content)}</p>
     `;
     threadMessages.appendChild(bubble);
@@ -345,13 +333,6 @@ sendBtn.addEventListener("click", sendPrompt);
 promptInput.addEventListener("keydown", e => { if (e.key === "Enter") sendPrompt(); });
 saveSettingsBtn.addEventListener("click", saveSettings);
 
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", async () => {
-    await fetch("/api/logout", { method: "POST" });
-    window.location.href = "/";
-  });
-}
-
 openSearchBtn.addEventListener("click", openSearch);
 closeSearchBtn.addEventListener("click", closeSearch);
 searchOverlay.addEventListener("click", e => { if (e.target === searchOverlay) closeSearch(); });
@@ -363,7 +344,6 @@ clearSearchBtn.addEventListener("click", () => {
 });
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-checkAuth();
 loadConversations();
 loadBookmarks();
 
@@ -410,8 +390,7 @@ async function submitSuggestion() {
   }
 
   // Disable the button and show a working message.
-  // DeepSeek can take 10-30 seconds to process a full file, so the user
-  // needs feedback that something is happening.
+  // DeepSeek can take a while (nooo!!!!) to process the file, so we want to let user know somethings happening
   suggestSubmitBtn.disabled = true;
   suggestSubmitBtn.textContent = "Working…";
   suggestStatus.style.color = "var(--text-secondary)";
@@ -426,14 +405,14 @@ async function submitSuggestion() {
     const data = await res.json();
 
     if (!res.ok) {
-      // Show whatever error the server returned (Constitution violation,
-      // syntax error, path error, etc.) so the user understands why it failed.
+      //show whatever error the server returned (Constitution violation,
+      //syntax error, path error, etc.) so the user understands why it failed.
       suggestStatus.style.color = "var(--danger, #e74c3c)";
       suggestStatus.textContent = `Error: ${data.error}`;
       return;
     }
 
-    // Success — tell the user where the backup is and that they need to reload.
+    // on success tell the user where the backup is and that they need to reload.
     // We don't auto-reload because the user may want to read the message first.
     suggestStatus.style.color = "var(--success, #27ae60)";
     suggestStatus.textContent =
@@ -443,7 +422,6 @@ async function submitSuggestion() {
     suggestStatus.style.color = "var(--danger, #e74c3c)";
     suggestStatus.textContent = `Network error: ${err.message}`;
   } finally {
-    // Always re-enable the button, even if there was an error
     suggestSubmitBtn.disabled = false;
     suggestSubmitBtn.textContent = "Apply Change";
   }

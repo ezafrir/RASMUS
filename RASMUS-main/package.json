@@ -1,27 +1,20 @@
 {
-  "name": "llm-prototype",
+  "name": "rasmus",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "Reactive AI Self-Modifying User System",
+  "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "jasmine"
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "node-fetch": "^3.3.2"
-  },
-  "devDependencies": {
-    "jasmine": "^6.1.0"
+    "node-fetch": "^2.7.0"
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "_comments": {
-    "CHANGED": "Added engines field — Node 18+ is required because llmService.js uses the built-in fetch API (available since Node 18). No extra npm packages are needed for Ollama. If you are on Node 17 or older, either upgrade Node or run: npm install node-fetch and update llmService.js to: const fetch = require('node-fetch');"
   }
 }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PistachioAI</title>
+  <title>RASMUS</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
@@ -16,16 +16,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-brand">
-        <svg class="pistachio-icon-sm" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <ellipse cx="32" cy="36" rx="22" ry="16" fill="var(--shell-outer)" />
-          <ellipse cx="32" cy="34" rx="20" ry="14" fill="var(--shell-inner)" />
-          <path d="M14 34 Q32 28 50 34" stroke="var(--shell-gap)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-          <ellipse cx="32" cy="32" rx="11" ry="8" fill="var(--nut-color)" />
-          <ellipse cx="32" cy="31" rx="8" ry="5.5" fill="var(--nut-highlight)" />
-          <path d="M24 20 Q32 10 40 20 Q36 26 32 25 Q28 26 24 20Z" fill="var(--shell-outer)" />
-          <path d="M25 21 Q32 13 39 21 Q36 25 32 24 Q28 25 25 21Z" fill="var(--shell-inner)" />
-        </svg>
-        <span class="brand-name">PistachioAI</span>
+        <span class="brand-name">RASMUS</span>
       </div>
 
       <div class="sidebar-new-chat">
@@ -57,12 +48,9 @@
           <h1 id="mainHeading">How can I help you?</h1>
           <div class="topbar-right">
             <button class="theme-toggle-app" id="themeToggleApp" title="Toggle theme" aria-label="Toggle theme">
-              <span class="theme-icon">🌿</span>
+              <span class="theme-icon">🌙</span>
             </button>
-            <!-- Suggest a Change button: opens the self-modification panel -->
             <button class="suggest-btn" id="openSuggestBtn" title="Suggest a UI change">✦ Suggest a Change</button>
-            <span id="userInfo" class="user-info-text"></span>
-            <button id="logoutBtn" class="logout-btn">Log Out</button>
           </div>
         </div>
       </div>
@@ -98,7 +86,7 @@
         </div>
 
         <div class="query-box">
-          <input type="text" id="promptInput" placeholder="Ask PistachioAI anything…" class="prompt-input" autocomplete="off" />
+          <input type="text" id="promptInput" placeholder="Ask RASMUS anything…" class="prompt-input" autocomplete="off" />
           <button id="sendBtn" class="send-btn">Send</button>
         </div>
       </div>
@@ -140,8 +128,6 @@
             <option value="public/app.js">public/app.js — Frontend logic</option>
             <option value="public/index.html">public/index.html — Main UI layout</option>
             <option value="public/style.css">public/style.css — Styles</option>
-            <option value="public/landing.html">public/landing.html — Login page</option>
-            <option value="public/landing.js">public/landing.js — Login logic</option>
           </select>
         </label>
 
@@ -171,15 +157,15 @@
   <script>
     // Theme persistence
     const html = document.documentElement;
-    const saved = localStorage.getItem('pistachioTheme') || 'light';
+    const saved = localStorage.getItem('rasmusTheme') || 'light';
     html.setAttribute('data-theme', saved);
     const tBtn = document.getElementById('themeToggleApp');
-    tBtn.querySelector('.theme-icon').textContent = saved === 'dark' ? '☀️' : '🌿';
+    tBtn.querySelector('.theme-icon').textContent = saved === 'dark' ? '☀️' : '🌙';
     tBtn.addEventListener('click', () => {
       const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
       html.setAttribute('data-theme', next);
-      localStorage.setItem('pistachioTheme', next);
-      tBtn.querySelector('.theme-icon').textContent = next === 'dark' ? '☀️' : '🌿';
+      localStorage.setItem('rasmusTheme', next);
+      tBtn.querySelector('.theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
     });
   </script>
 </body>
