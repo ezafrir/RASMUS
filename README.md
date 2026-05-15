@@ -2,6 +2,7 @@
 Reactive AI Self Modifying User System
 
 Named after [Rasmus](https://comicsinfo.dk/rasmus.htm), a book I grew up loving about a mischievous ostrich!
+
 **Author:** Emma Zafrir
 
 ## Project Description
