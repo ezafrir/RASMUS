@@ -1,81 +1,67 @@
-/* ═══════════════════════════════════════════════════════════════
-   PistachioAI — Stylesheet
-   Light & Dark mode via [data-theme] on <html>
-   ═══════════════════════════════════════════════════════════════ */
+
 
 /* ── CSS Variables ─────────────────────────────────────────────── */
 :root,
 [data-theme="light"] {
-  --primary:          #93C572;
-  --primary-hover:    #7FB35F;
-  --accent:           #3F6B3C;
-  --bg:               #F7F8F4;
+  --primary:          #c572a0;
+  --primary-hover:    #b35f9e;
+  --accent:           #6b3c5b;
+  --bg:               #f8f4f7;
   --surface:          #FFFFFF;
-  --surface-raised:   #F0F4EE;
-  --border:           #E2E8E0;
+  --surface-raised:   #f4eef4;
+  --border:           #e8e0e7;
   --text:             #1F2937;
   --text-secondary:   #6B7280;
   --text-muted:       #9CA3AF;
-  --user-bubble-bg:   #3F6B3C;
+  --user-bubble-bg:   #6b3c61;
   --user-bubble-text: #FFFFFF;
   --ai-bubble-bg:     #FFFFFF;
-  --ai-bubble-border: #E2E8E0;
+  --ai-bubble-border: #e8e0e7;
   --ai-bubble-text:   #1F2937;
-  --dot-color:        #93C572;
+  --dot-color:        #c572b7;
   --sidebar-bg:       #FFFFFF;
   --topbar-bg:        #FFFFFF;
   --bottombar-bg:     #FFFFFF;
-  --card-shadow:      0 4px 20px rgba(63, 107, 60, 0.08);
-  --input-bg:         #F7F8F4;
-  --active-chat-bg:   #EBF5E6;
-  --active-chat-text: #3F6B3C;
-  --pill-bg:          #EBF5E6;
-  --pill-text:        #3F6B3C;
-  --tab-active-bg:    #93C572;
+  --card-shadow:      0 4px 20px rgba(107, 60, 95, 0.08);
+  --input-bg:         #f8f4f8;
+  --active-chat-bg:   #f5e6f3;
+  --active-chat-text: #6b3c67;
+  --pill-bg:          #f5e6f3;
+  --pill-text:        #6b3c5b;
+  --tab-active-bg:    #c572b0;
   --tab-active-text:  #FFFFFF;
 
-  /* Pistachio shell SVG colors */
-  --shell-outer:   #C8A96E;
-  --shell-inner:   #E0C68A;
-  --shell-gap:     #8B6914;
-  --nut-color:     #6BAA3A;
-  --nut-highlight: #93C572;
 }
 
 [data-theme="dark"] {
-  --primary:          #93C572;
-  --primary-hover:    #7FB35F;
-  --accent:           #B7E4A8;
-  --bg:               #0F1411;
-  --surface:          #1A221D;
-  --surface-raised:   #1F2B22;
-  --border:           #2A3D2E;
+  --primary:          #c572a0;
+  --primary-hover:    #b35f9e;
+  --accent:           #6b3c5b;
+  --bg:               #140f13;
+  --surface:          #221a21;
+  --surface-raised:   #2b1f27;
+  --border:           #3d2a3a;
   --text:             #E5E7EB;
-  --text-secondary:   #9CA3AF;
+  --text-secondary:   #af9cac;
   --text-muted:       #6B7280;
-  --user-bubble-bg:   #93C572;
-  --user-bubble-text: #0F1411;
-  --ai-bubble-bg:     #1F2B22;
-  --ai-bubble-border: #2A3D2E;
+  --user-bubble-bg:   #c572c1;
+  --user-bubble-text: #140f13;
+  --ai-bubble-bg:     #2b1f2a;
+  --ai-bubble-border: #3b2a3d;
   --ai-bubble-text:   #E5E7EB;
-  --dot-color:        #B7E4A8;
-  --sidebar-bg:       #1A221D;
-  --topbar-bg:        #1A221D;
-  --bottombar-bg:     #1A221D;
+  --dot-color:        #e4a8da;
+  --sidebar-bg:       #221a21;
+  --topbar-bg:        #221a21;
+  --bottombar-bg:     #221a20;
   --card-shadow:      0 4px 24px rgba(0,0,0,0.4);
-  --input-bg:         #0F1411;
-  --active-chat-bg:   #243B28;
-  --active-chat-text: #B7E4A8;
-  --pill-bg:          #1F2B22;
-  --pill-text:        #B7E4A8;
-  --tab-active-bg:    #93C572;
-  --tab-active-text:  #0F1411;
+  --input-bg:         #140f13;
+  --active-chat-bg:   #3b2436;
+  --active-chat-text: #e4a8dc;
+  --pill-bg:          #2b1f27;
+  --pill-text:        #e4a8da;
+  --tab-active-bg:    #c572ac;
+  --tab-active-text:  #140f13;
 
-  --shell-outer:   #8B6530;
-  --shell-inner:   #A07840;
-  --shell-gap:     #5C4010;
-  --nut-color:     #4D8A28;
-  --nut-highlight: #6BAA3A;
 }
 
 /* ── Reset & Base ───────────────────────────────────────────────── */
@@ -111,212 +97,6 @@ body {
   transition: background 0.2s, border-color 0.2s, transform 0.15s;
 }
 .theme-toggle:hover { transform: scale(1.1); background: var(--surface-raised); }
-
-/* ── Pistachio SVG shared ───────────────────────────────────────── */
-.pistachio-icon    { width: 56px; height: 56px; flex-shrink: 0; }
-.pistachio-icon-sm { width: 30px; height: 30px; flex-shrink: 0; }
-
-/* ════════════════════════════════════════════════════════════════
-   LANDING PAGE
-   ════════════════════════════════════════════════════════════════ */
-
-.landing-body {
-  min-height: 100vh;
-  background: var(--bg);
-}
-
-.landing-wrapper {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 1.1fr 0.9fr;
-  align-items: center;
-  gap: 48px;
-  max-width: 1160px;
-  margin: 0 auto;
-  padding: 60px 40px;
-}
-
-/* Left hero */
-.pistachio-logo {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 28px;
-}
-
-.logo-text {
-  font-family: 'DM Serif Display', Georgia, serif;
-  font-size: 32px;
-  color: var(--accent);
-  letter-spacing: -0.5px;
-}
-
-.mini-tag {
-  display: inline-block;
-  background: var(--pill-bg);
-  color: var(--pill-text);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 6px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  margin-bottom: 20px;
-}
-
-.hero-title {
-  font-family: 'DM Serif Display', Georgia, serif;
-  font-size: 58px;
-  line-height: 1.1;
-  color: var(--text);
-  margin-bottom: 20px;
-}
-.hero-title em {
-  font-style: italic;
-  color: var(--accent);
-}
-
-.hero-desc {
-  font-size: 18px;
-  line-height: 1.75;
-  color: var(--text-secondary);
-  max-width: 480px;
-  margin-bottom: 32px;
-}
-
-.feature-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-.pill {
-  background: var(--pill-bg);
-  color: var(--pill-text);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 8px 18px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* Auth card */
-.landing-card {
-  background: var(--surface);
-  border: 1.5px solid var(--border);
-  border-radius: 24px;
-  padding: 36px 32px;
-  box-shadow: var(--card-shadow);
-}
-
-.card-logo-mini {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 24px;
-  font-family: 'DM Serif Display', serif;
-  font-size: 18px;
-  color: var(--accent);
-}
-
-.card-welcome {
-  font-family: 'DM Serif Display', Georgia, serif;
-  font-size: 28px;
-  color: var(--text);
-  margin-bottom: 6px;
-}
-.card-sub {
-  font-size: 15px;
-  color: var(--text-secondary);
-  margin-bottom: 24px;
-}
-
-/* Auth tabs */
-.auth-tabs {
-  display: flex;
-  background: var(--surface-raised);
-  border-radius: 12px;
-  padding: 4px;
-  gap: 4px;
-  margin-bottom: 24px;
-  border: 1px solid var(--border);
-}
-.auth-tab {
-  flex: 1;
-  padding: 9px 16px;
-  border: none;
-  background: transparent;
-  border-radius: 9px;
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: background 0.18s, color 0.18s;
-  font-family: 'DM Sans', sans-serif;
-}
-.auth-tab.active {
-  background: var(--tab-active-bg);
-  color: var(--tab-active-text);
-  font-weight: 600;
-}
-
-/* Auth panels */
-.auth-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-.auth-panel.hidden { display: none; }
-
-.auth-input {
-  width: 100%;
-  padding: 13px 16px;
-  font-size: 15px;
-  font-family: 'DM Sans', sans-serif;
-  background: var(--input-bg);
-  border: 1.5px solid var(--border);
-  border-radius: 12px;
-  color: var(--text);
-  outline: none;
-  transition: border-color 0.18s, box-shadow 0.18s;
-}
-.auth-input::placeholder { color: var(--text-muted); }
-.auth-input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(147, 197, 114, 0.2);
-}
-
-.auth-btn {
-  width: 100%;
-  padding: 13px 20px;
-  border: none;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: 'DM Sans', sans-serif;
-  cursor: pointer;
-  transition: background 0.18s, transform 0.12s;
-  margin-top: 4px;
-}
-.primary-btn {
-  background: var(--primary);
-  color: #fff;
-}
-.primary-btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
-.secondary-btn {
-  background: var(--surface-raised);
-  color: var(--text-secondary);
-  border: 1.5px solid var(--border);
-}
-.secondary-btn:hover { background: var(--border); }
-
-.auth-message {
-  margin-top: 16px;
-  font-size: 14px;
-  color: #E05252;
-  min-height: 20px;
-  text-align: center;
-}
 
 /* ════════════════════════════════════════════════════════════════
    APP PAGE
@@ -759,7 +539,7 @@ body {
 .prompt-input::placeholder { color: var(--text-muted); }
 .prompt-input:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(147,197,114,0.18);
+  box-shadow: 0 0 0 3px rgba(197, 114, 190, 0.18);
 }
 .send-btn {
   padding: 14px 26px;

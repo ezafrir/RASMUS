@@ -1,4 +1,5 @@
 // ─── DOM refs ────────────────────────────────────────────────────────────────
+//test
 const chatList            = document.getElementById("chatList");
 const bookmarkList        = document.getElementById("bookmarkList");
 const responseSection     = document.getElementById("responseSection");
