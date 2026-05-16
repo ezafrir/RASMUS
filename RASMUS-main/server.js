@@ -51,7 +51,7 @@ async function generateChatTitle(prompt) {
  
  
 async function createConversation(prompt, shorten) {
-  let response = await generateLLMResponse(prompt);
+  let response = await generateLLMResponse(prompt, []);
  
   if (shorten) {
     response = shortenResponse(response, settings.responseLength);
@@ -84,7 +84,7 @@ async function addMessageToConversation(id, prompt, shorten) {
   const conversation = conversations.find(c => c.id === id);
   if (!conversation) return null;
  
-  let response = await generateLLMResponse(prompt);
+  let response = await generateLLMResponse(prompt, conversation.nessages);
   if (shorten) {
     response = shortenResponse(response, settings.responseLength);
   }
