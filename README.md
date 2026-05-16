@@ -1,6 +1,8 @@
 # RASMUS
 ## Reactive AI Self Modifying User System
 
+Reactive/Real-Time/Recursive??? Unsure which R haha
+
 Named after [Rasmus](https://comicsinfo.dk/rasmus.htm), a book I grew up loving about a mischievous ostrich!
 
 **Author:** Emma Zafrir
