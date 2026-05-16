@@ -34,6 +34,8 @@ It features a self-modification system where RASMUS can rewrite its own frontend
 4. Install dependencies by entering:
 
    npm install
+
+   npm install express
 5. Start the server by entering:
 
    npm start
