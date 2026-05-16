@@ -11,15 +11,10 @@ const fetch = require("node-fetch");
 //   makes it significantly more reliable than a general model for that task.
 //   Pull it with: ollama pull deepseek-coder
 //
-// WHY TWO MODELS?
-//   A general chat model is optimised for conversation. it produces fluent,
-//   helpful prose. A code model is optimised for producing syntactically valid,
-//   structured output. Using the right tool for each job gives better results
-//   and keeps the chat model fast for everyday use.
 
 const OLLAMA_BASE_URL = "http://127.0.0.1:11434"; // default Ollama address
 const CHAT_MODEL    = "llama3.2:latest";               // normal conversations
-const CODE_MODEL = "deepseek-coder:6.7b"; //for self-modification  - 5.8
+const CODE_MODEL = "deepseek-coder:33b-instruct"; //for self-modification  - requires 20gb free
 // Core fetch helper::::
 // Both exported functions below share this helper to avoid repeating the same fetch/error-handling logic.
 // The DRY principle from class!!!
@@ -129,7 +124,7 @@ Nothing else. No exceptions.
 
 OUTPUT FORMAT -- MANDATORY. FOLLOW THIS EXACTLY:
 <<<FIND>>>
-(paste exact lines from the file here — no parentheses, no explanation)
+(paste exact lines from the file here. no parentheses, no explanation. If you are ADDING something new with nothing to replace, leave FIND COMPLETELY empty)
 <<<REPLACE>>>
 (paste new lines here)
 <<<END>>>
@@ -142,7 +137,7 @@ RULES FOR THE FORMAT:
 <<<END>>>
 - Never reference variables at the top of the file that are declared later in the file
 - Always place new code AFTER the existing variable declarations section
-- Copy FIND lines CHARACTER FOR CHARACTER from the file — no paraphrasing
+- Copy FIND lines CHARACTER FOR CHARACTER from the file. no paraphrasing
 - Never escape forward slashes. Write // not \/\/
 - If FIND is empty, leave it completely blank!!! no placeholder text, no parentheses, no explanation!
 - One block per change. Do not chain multiple blocks.
