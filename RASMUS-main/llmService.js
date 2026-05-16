@@ -123,18 +123,23 @@ You receive a file and an instruction. You return a search-and-replace block.
 Nothing else. No exceptions.
 
 OUTPUT FORMAT -- MANDATORY. FOLLOW THIS EXACTLY:
+
+For MODIFICATIONS (replacing existing code):
 <<<FIND>>>
-(paste exact lines from the file here. no parentheses, no explanation. If you are ADDING something new with nothing to replace, leave FIND COMPLETELY empty)
+(the exact code to find, verbatim, including whitespace and newlines)
 <<<REPLACE>>>
-(paste new lines here)
+(the exact new code to replace it with)
+<<<END>>>
+
+For ADDITIONS (not replacing existing code):
+<<<FIND>>>
+(ONLY ONE existing line of code, COMPLETELY VERBATIM, that your new code will be added AFTER. This is your anchor point.)
+<<<REPLACE>>>
+(That same exisiting line (NO COMMENTS), THEN your new code IMMEDIATELY AFTER IT)
 <<<END>>>
 
 RULES FOR THE FORMAT:
-- If you are ADDING something new with nothing to replace, leave FIND empty like this:
-<<<FIND>>>
-<<<REPLACE>>>
-(new lines to add at the top of the file) 
-<<<END>>>
+- NEVER USE AN EMPTY FIND BLOCK, EVEN IF YOU'RE ADDING SOMETHING NEW. Always anchor to ONE line exisitng already. 
 - Never reference variables at the top of the file that are declared later in the file
 - Always place new code AFTER the existing variable declarations section
 - Copy FIND lines CHARACTER FOR CHARACTER from the file. no paraphrasing
