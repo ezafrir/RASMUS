@@ -93,8 +93,32 @@ async function callOllama(model, userPrompt, systemPrompt = null) {
 
 
 // exported function 1 for normal chat
-async function generateLLMResponse(prompt) {
-  return callOllama(CHAT_MODEL, prompt, CHAT_PERSONALITY);
+async function generateLLMResponse(prompt, history = []) {
+  const messages = [];
+
+  messages.push({ role: "system", content: CHAT_PERSONALITY });
+  for (const msg of history) {
+    messages.push({ role: msg.role, content: msg.content });
+  }
+
+  messages.push({ role: "user", content: prompt });
+  const requestBody = {
+    model: CHAT_MODEL,
+    messages,
+    stream: false,
+    options: { num_predict: 1024, temperature: 0.7 }
+  };
+
+  const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(requestBody)
+  });
+
+  const data = await response.json();
+  return data.message.content;
+
+  
 }
 
 
