@@ -520,8 +520,46 @@ app.post("/api/suggest", async (req, res) => {
 });
  
  
+ // exports conversation as jsonl to fine tune a model
+ // each line is one converstion (not too pretty unfortunately but this is what it likes)
+ //browser will download conversations as rasmus-conversations.jsonl
+//
+// FORMAT per line:
+// {"messages": [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]}
+//
+// conversations with only one message (meaning no reply yet) are skipped.
+// the RASMUS system prompt is included in each conversation so the new model learns the personality context too.
  
+app.get("/api/conversations/export", (req, res) => {
+  const lines = conversations
+    .filter(c => c.messages && c.messages.length >= 2)
+    .map(c => {
+      const messages = [
+        // here we are including the personality system prompt in each training example
+        { role: "system", content: "You are RASMUS, a helpful AI assistant. You are warm, friendly, and occasionally witty — but never arrogant or condescending." },
+        ...c.messages.map(m => ({
+          role: m.role,
+          content: m.content
+        }))
+      ];
+      return JSON.stringify({ messages });
+    });
  
+  if (lines.length === 0) {
+    return res.status(404).json({ error: "No conversations to export yet." });
+  }
+ 
+  // set headers so the browser downloads it as a file
+  res.setHeader("Content-Type", "application/x-ndjson");
+  res.setHeader("Content-Disposition", "attachment; filename=rasmus-conversations.jsonl");
+  res.send(lines.join("\n"));
+});
+ 
+
+//-----------------
+
+
+
 // Start server 
 if (require.main === module) {
   app.listen(PORT, () => {
