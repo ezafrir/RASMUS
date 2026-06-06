@@ -529,6 +529,23 @@ app.post("/api/suggest", async (req, res) => {
 //
 // conversations with only one message (meaning no reply yet) are skipped.
 // the RASMUS system prompt is included in each conversation so the new model learns the personality context too.
+
+
+
+// how it works....
+
+// 1. the export button in index.html is an <a> tag pointing to this endpoint with the download attribute:
+//    the browser's download attribute triggers a file save automatically without any extra JavaScript needed
+// 2. this endpoint filters out incomplete conversations (fewer than 2 messages),
+//    then maps each conversation into the format unsloth expects for training (ugly jsonl stuff)
+// 3. response headers tell the browser to download the result as a file
+//    named rasmus-conversations.jsonl rather than displaying it on screen.
+
+
+// conversations are stored IN MEMORY. they are lost if the server restarts
+//
+// then we will push the exported .jsonl file into unsloth on google colab once i set it up... 
+// to fine-tune a Llama model on RASMUS's personality
  
 app.get("/api/conversations/export", (req, res) => {
   const lines = conversations
