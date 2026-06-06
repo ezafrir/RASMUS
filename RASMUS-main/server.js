@@ -84,7 +84,7 @@ async function addMessageToConversation(id, prompt, shorten) {
   const conversation = conversations.find(c => c.id === id);
   if (!conversation) return null;
  
-  let response = await generateLLMResponse(prompt, conversation.nessages);
+  let response = await generateLLMResponse(prompt, conversation.messages);
   if (shorten) {
     response = shortenResponse(response, settings.responseLength);
   }
