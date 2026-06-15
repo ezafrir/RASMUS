@@ -295,6 +295,24 @@ app.put("/api/settings/response-length", (req, res) => {
   });
 });
  
+
+
+// returns -1 (global) to +1 (sequential) leaning for a conversation
+app.get("/api/cognitive-profile/:conversationId", (req, res) => {
+  const id = Number(req.params.conversationId);
+  const logs = interactionLogs.filter(l => l.conversationId === id);
+
+  let sequential = 0, global = 0;
+  logs.forEach(l => {
+    if (l.contains_overview_language) global++;
+    if (l.contains_stepwise_language) sequential++;
+  });
+
+  const total = sequential + global;
+  const leaning = total === 0 ? 0 : (sequential - global) / total;
+
+  res.json({ leaning, sequential, global, sampleSize: logs.length });
+});
  
  
 // Self-modification system----------------------------------------------
