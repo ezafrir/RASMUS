@@ -21,7 +21,11 @@ app.use(express.urlencoded({ extended: true }));
 // In-memory data
 let conversations = [];
 let nextId = 1;
- 
+let interactionLogs = [];
+
+
+
+
 let settings = {
   responseLength: 200
 };
@@ -123,6 +127,30 @@ function deleteConversationById(id) {
 //debug 2 line
 // const filePath = path.join(__dirname, "public", "index.html");
 // console.log("Serving:", filePath);
+
+
+// Cognitive adaptation logging
+// stores signals per message so we can score sequential vs global leaning on a high level
+// pulls simple keyword signals out of the user's prompt
+function logInteraction(conversationId, prompt, messageIndex) {
+  const words = prompt.trim().split(/\s+/);
+
+  // "why", "overview" etc means the user wants the big picture (global)
+  const overviewPattern = /\b(overall|big picture|why|in general|overview|summary)\b/i;
+  // "next", "step" etc means the user wants the next specific thing (sequential)
+  const stepwisePattern = /\b(next|specifically|step|how do i|exactly|precisely)\b/i;
+
+  interactionLogs.push({
+    conversationId,
+    messageIndex,
+    timestamp: new Date().toISOString(),
+    length_words: words.length,
+    contains_overview_language: overviewPattern.test(prompt),
+    contains_stepwise_language: stepwisePattern.test(prompt),
+  });
+}
+
+
 
 // Static files 
 app.use(express.static(path.join(__dirname, "public")));
