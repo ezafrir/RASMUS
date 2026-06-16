@@ -14,7 +14,10 @@ const fetch = require("node-fetch");
 
 const OLLAMA_BASE_URL = "http://127.0.0.1:11434"; // default Ollama address
 const CHAT_MODEL    = "llama3.2:latest";               // normal conversations
-const CODE_MODEL = "deepseek-coder:33b-instruct"; //for self-modification  - requires 20gb free
+//const CODE_MODEL = "deepseek-coder:33b-instruct"; //for self-modification  - requires 20gb free
+
+const CODE_MODEL = "deepseek-coder:6.7b"; //for emma pc :(
+
 // Core fetch helper::::
 // Both exported functions below share this helper to avoid repeating the same fetch/error-handling logic.
 // The DRY principle from class!!!
