@@ -85,9 +85,11 @@ async function createConversation(prompt, shorten) {
  
  
 async function addMessageToConversation(id, prompt, shorten) {
+  
   const conversation = conversations.find(c => c.id === id);
   if (!conversation) return null;
- 
+  logInteraction(id, prompt, conversation.messages.length);
+  
   let response = await generateLLMResponse(prompt, conversation.messages);
   if (shorten) {
     response = shortenResponse(response, settings.responseLength);
@@ -100,6 +102,8 @@ async function addMessageToConversation(id, prompt, shorten) {
   conversation.prompt = prompt;
   conversation.response = response;
  
+  triggerCognitiveAdaptation(id).catch(err => console.error("Background adaptation error:", err));
+
   return conversation;
 }
  
@@ -566,6 +570,46 @@ app.post("/api/suggest", async (req, res) => {
 });
  
  
+
+// auto-triggers a UI change via the existing self-mod pipeline based on leaning
+async function triggerCognitiveAdaptation(conversationId) {
+  const profileRes = await fetch(`http://localhost:3000/api/cognitive-profile/${conversationId}`);
+  const { leaning, sampleSize } = await profileRes.json();
+
+  if (sampleSize < 5 || Math.abs(leaning) < 0.3) return; // not enough signal
+
+  const instruction = leaning > 0
+    ? "Add a numbered step-by-step breakdown panel to assistant responses, with each step collapsible"
+    : "Add a summary/overview panel at the top of assistant responses, showing the key takeaway before details";
+
+  const filePath = "public/index.html";
+  const absPath = path.resolve(PROJECT_ROOT, filePath);
+  const currentContents = fs.readFileSync(absPath, "utf8");
+
+  let modifiedCode;
+  try {
+    modifiedCode = await generateCodeModification(instruction, currentContents, filePath);
+  } catch (err) {
+    console.error("Auto-adaptation failed:", err.message);
+    return;
+  }
+
+  if (modifiedCode.trim().startsWith("CONSTITUTION_VIOLATION:")) return;
+
+  let finalContent;
+  try {
+    finalContent = applyDiff(currentContents, modifiedCode);
+  } catch (err) {
+    console.error("Auto-adaptation diff error:", err.message);
+    return;
+  }
+
+  const backupPath = backupFile(absPath);
+  safeWrite(filePath, finalContent);
+  console.log(`[auto-adapt] Modified ${filePath} based on leaning=${leaning}. Backup: ${backupPath}`);
+}
+
+
  // exports conversation as jsonl to fine tune a model
  // each line is one converstion (not too pretty unfortunately but this is what it likes)
  //browser will download conversations as rasmus-conversations.jsonl
