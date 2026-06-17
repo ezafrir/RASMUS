@@ -582,7 +582,7 @@ async function triggerCognitiveAdaptation(conversationId) {
     ? "Add a numbered step-by-step breakdown panel to assistant responses, with each step collapsible"
     : "Add a summary/overview panel at the top of assistant responses, showing the key takeaway before details";
 
-  const filePath = "public/index.html";
+  const filePath = "public/app.js";
   const absPath = path.resolve(PROJECT_ROOT, filePath);
   const currentContents = fs.readFileSync(absPath, "utf8");
 
