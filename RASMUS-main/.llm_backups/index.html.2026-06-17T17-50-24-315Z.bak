@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RASMUS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="app-body">
+
+  <div class="app-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-name">RASMUS</span>
+      </div>
+
+      <div class="sidebar-new-chat">
+        <button id="newChatBtn" class="new-chat-btn">＋ New Chat</button>
+      </div>
+
+      <div class="sidebar-section">
+        <p class="sidebar-label">Chats</p>
+        <ul id="chatList"></ul>
+      </div>
+
+      <div class="sidebar-section">
+        <p class="sidebar-label">Bookmarked</p>
+        <ul id="bookmarkList"></ul>
+      </div>
+
+      <!-- Search All Conversations button pinned to bottom-left (Change #4) -->
+      <div class="sidebar-footer">
+        <button class="search-all-btn" id="openSearchBtn">🔍 Search All Conversations</button>
+        <a href="/api/conversations/export" download="rasmus-conversations.jsonl" class="search-all-btn" id="exportBtn">⬇ Export as JSONL</a>
+      </div>
+    </aside>
+
+    <!-- Main area -->
+    <main class="main">
+
+      <!-- Top bar -->
+      <div class="topbar">
+        <div class="topbar-row">
+          <h1 id="mainHeading">How can I help you?</h1>
+          <div class="topbar-right">
+            <button class="theme-toggle-app" id="themeToggleApp" title="Toggle theme" aria-label="Toggle theme">
+              <span class="theme-icon">🌙</span>
+            </button>
+            <button class="suggest-btn" id="openSuggestBtn" title="Suggest a UI change">✦ Suggest a Change</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable chat area -->
+      <div class="chat-scroll-area">
+        <section id="threadSection" class="thread-section" style="display:none;">
+          <div class="thread-header">
+            <h2 id="threadTitle"></h2>
+            <div class="thread-actions">
+              <button id="threadBookmarkBtn" class="action-btn">📌 Bookmark</button>
+              <button id="threadUnbookmarkBtn" class="action-btn">🗑 Unbookmark</button>
+              <button id="threadDeleteBtn" class="action-btn danger-btn">✕ Delete</button>
+            </div>
+          </div>
+          <div id="threadMessages" class="thread-messages"></div>
+        </section>
+        <section id="responseSection"></section>
+      </div>
+
+      <!-- Bottom input bar -->
+      <div class="bottom-bar">
+        <div class="settings-row">
+          <label class="settings-label">
+            <input type="checkbox" id="shortenToggle" />
+            <span>Shorten response</span>
+          </label>
+          <label class="settings-label">
+            Max words:
+            <input type="number" id="wordLimit" value="200" min="1" class="word-limit-input" />
+          </label>
+          <button id="saveSettingsBtn" class="settings-btn">Save Settings</button>
+        </div>
+
+        <div class="query-box">
+          <input type="text" id="promptInput" placeholder="Ask RASMUS anything…" class="prompt-input" autocomplete="off" />
+          <button id="sendBtn" class="send-btn">Send</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Search Modal (Change #4) -->
+  <div class="search-modal-overlay hidden" id="searchOverlay">
+    <div class="search-modal">
+      <div class="search-modal-header">
+        <h3>Search All Conversations</h3>
+        <button class="search-modal-close" id="closeSearchBtn">✕</button>
+      </div>
+      <div class="search-modal-body">
+        <input type="text" id="searchInput" placeholder="Search by keyword…" class="auth-input search-modal-input" autocomplete="off" />
+        <div class="search-modal-actions">
+          <button id="searchBtn" class="auth-btn primary-btn">Search</button>
+          <button id="clearSearchBtn" class="auth-btn secondary-btn">Clear</button>
+        </div>
+      </div>
+      <div id="searchResults" class="search-results"></div>
+    </div>
+  </div>
+
+
+  <div class="search-modal-overlay hidden" id="suggestOverlay">
+    <div class="search-modal suggest-modal">
+      <div class="search-modal-header">
+        <h3>✦ Suggest a Change</h3>
+        <button class="search-modal-close" id="closeSuggestBtn">✕</button>
+      </div>
+      <div class="search-modal-body">
+
+        <!-- File selector: only public/ files are allowed by the server -->
+        <label class="settings-label" style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;">
+          <span style="font-size:13px;font-weight:600;">File to modify</span>
+          <select id="suggestFile" class="auth-input" style="cursor:pointer;">
+            <option value="public/app.js">public/app.js — Frontend logic</option>
+            <option value="public/index.html">public/index.html — Main UI layout</option>
+            <option value="public/style.css">public/style.css — Styles</option>
+          </select>
+        </label>
+
+        <!-- Natural language instruction from the user -->
+        <label class="settings-label" style="display:flex;flex-direction:column;gap:6px;">
+          <span style="font-size:13px;font-weight:600;">Your instruction</span>
+          <textarea
+            id="suggestInstruction"
+            class="auth-input"
+            placeholder="Describe the change you want, e.g. 'Add a character counter below the prompt input that shows how many characters have been typed'"
+            style="min-height:100px;resize:vertical;font-family:inherit;font-size:14px;padding:10px;"
+          ></textarea>
+        </label>
+
+        <div class="search-modal-actions" style="margin-top:14px;">
+          <button id="suggestSubmitBtn" class="auth-btn primary-btn">Apply Change</button>
+          <button id="suggestCancelBtn" class="auth-btn secondary-btn">Cancel</button>
+        </div>
+
+        <!-- Status message shown while waiting for DeepSeek, and after -->
+        <p id="suggestStatus" style="margin-top:14px;font-size:13px;color:var(--text-secondary);min-height:20px;"></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Theme persistence
+    const html = document.documentElement;
+    const saved = localStorage.getItem('rasmusTheme') || 'light';
+    html.setAttribute('data-theme', saved);
+    const tBtn = document.getElementById('themeToggleApp');
+    tBtn.querySelector('.theme-icon').textContent = saved === 'dark' ? '☀️' : '🌙';
+    tBtn.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      localStorage.setItem('rasmusTheme', next);
+      tBtn.querySelector('.theme-icon').textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+  </script>
+</body>
+</html>

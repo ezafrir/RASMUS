@@ -683,3 +683,7 @@ module.exports = {
   unbookmarkConversation,
   deleteConversationById
 };
+
+
+
+// for leaning: curl http://localhost:3000/api/cognitive-profile/1
