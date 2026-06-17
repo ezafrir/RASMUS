@@ -1,4 +1,4 @@
-
+require("dotenv").config();
 const path = require("path");
 const fs   = require("fs");    // needed for the self-modification backup + write system
 const express = require("express");

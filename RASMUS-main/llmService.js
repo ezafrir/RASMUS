@@ -14,9 +14,8 @@ const fetch = require("node-fetch");
 
 const OLLAMA_BASE_URL = "http://127.0.0.1:11434"; // default Ollama address
 const CHAT_MODEL    = "llama3.2:latest";               // normal conversations
-//const CODE_MODEL = "deepseek-coder:33b-instruct"; //for self-modification  - requires 20gb free
+//const CODE_MODEL = "deepseek-coder:33b-instruct"; //for self-modification  - requires 20gb free - no longer used. switching to claude!
 
-const CODE_MODEL = "deepseek-coder:6.7b"; //for emma pc :(
 
 // Core fetch helper::::
 // Both exported functions below share this helper to avoid repeating the same fetch/error-handling logic.
@@ -189,22 +188,37 @@ NOT ALLOWED:
 IF THE INSTRUCTION VIOLATES ANY RULE, return only this exact string:
 CONSTITUTION_VIOLATION:  Your instruction violates the rules of this system and cannot be fulfilled. Please revise or abandon your suggestion.`;
 
+// old deepseek function----------------------------------------------------------------------
+// async function generateCodeModification(instruction, fileContents, filePath) {
+//   const trimmedContents = fileContents
+//     .split("\n")
+//     .slice(0, 100)
+//     .join("\n");
+
+//   const userPrompt =
+//     `File: ${filePath}\n\n` +
+//     `File start:\n${trimmedContents}\n\n` +
+//     `Instruction: ${instruction}`;
+
+//   return callOllama(CODE_MODEL, userPrompt, CONSTITUTION); //sends all to deepseek
+// }
+
+const Anthropic = require("@anthropic-ai/sdk");
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 async function generateCodeModification(instruction, fileContents, filePath) {
-  const trimmedContents = fileContents
-    .split("\n")
-    .slice(0, 100)
-    .join("\n");
+  const trimmedContents = fileContents.split("\n").slice(0, 100).join("\n");
+  const userPrompt = `File: ${filePath}\n\nFile start:\n${trimmedContents}\n\nInstruction: ${instruction}`;
 
-  const userPrompt =
-    `File: ${filePath}\n\n` +
-    `File start:\n${trimmedContents}\n\n` +
-    `Instruction: ${instruction}`;
+  const message = await client.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 1024,
+    system: CONSTITUTION,
+    messages: [{ role: "user", content: userPrompt }]
+  });
 
-  return callOllama(CODE_MODEL, userPrompt, CONSTITUTION); //sends all to deepseek
+  return message.content[0].text;
 }
-
-
 
 
 
