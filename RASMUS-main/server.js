@@ -415,60 +415,93 @@ function validateJS(code) {
 }
  
  
-function applyDiff(originalContent, diffOutput) {
-  // Strip markdown code fences
-  let cleaned = diffOutput.replace(/^```[\w]*\n?/m, "").replace(/```\s*$/m, "");
+// function applyDiff(originalContent, diffOutput) {
+//   // Strip markdown code fences
+//   let cleaned = diffOutput.replace(/^```[\w]*\n?/m, "").replace(/```\s*$/m, "");
  
-  // Strip markdown hyperlinks: [text](url) → text
-  cleaned = cleaned.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+//   // Strip markdown hyperlinks: [text](url) → text
+//   cleaned = cleaned.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
  
-  // Clean escaped forward slashes
+//   // Clean escaped forward slashes
+//   cleaned = cleaned.replace(/\\\//g, "/");
+ 
+//   // Strip anything after <<<END>>>
+//   if (cleaned.includes("<<<END>>>")) {
+//     cleaned = cleaned.split("<<<END>>>")[0] + "<<<END>>>";
+//   }
+ 
+//   // If no diff block exists at all, check if it looks like raw code
+//   // and prepend it to the file as a fallback
+//   if (!cleaned.includes("<<<FIND>>>") && !cleaned.includes("<<<REPLACE>>>")) {
+//     // Strip any trailing prose after the last closing brace
+//     const lastBrace = cleaned.lastIndexOf("}");
+//     const codeOnly = lastBrace !== -1 ? cleaned.slice(0, lastBrace + 1) : cleaned;
+//     console.log("No diff block found — treating output as raw code prepend");
+//     return codeOnly + "\n\n" + originalContent;
+//   }
+ 
+//   const findMatch    = cleaned.match(/<<<FIND>>>([\s\S]*?)<<<REPLACE>>>/);
+//   const replaceMatch = cleaned.match(/<<<REPLACE>>>([\s\S]*?)<<<END>>>/);
+ 
+//   if (!findMatch || !replaceMatch) {
+//     throw new Error(
+//       "Model did not return a valid diff block. " +
+//       "Raw output: " + diffOutput.slice(0, 200)
+//     );
+//   }
+ 
+//   let findText    = findMatch[1];
+//   let replaceText = replaceMatch[1];
+ 
+//   const isPlaceholder = findText.trim().startsWith("(") && findText.trim().endsWith(")");
+//   const isExample     = findText.includes("copy the exact lines") || findText.includes("verbatim");
+ 
+//   if (findText.trim() === "" || isPlaceholder || isExample) {
+//     return replaceText + originalContent;
+//   }
+ 
+//   if (!originalContent.includes(findText)) {
+//     throw new Error(
+//       "Could not find the target text in the file. " +
+//       "The model may have hallucinated lines that don't exist."
+//     );
+//   }
+ 
+//   return originalContent.replace(findText, replaceText);
+// }
+
+
+function applyDiff(originalContents, diffOutput) { //for multi-file diffs upddte
+  // originalContents is now ignored and we read/write files directly by name
+  // diffOutput contains multiple <<<>>> blocks
+
+  let cleaned = diffOutput.replace(/^```[\w]*\n?/gm, "").replace(/```\s*$/gm, "");
   cleaned = cleaned.replace(/\\\//g, "/");
- 
-  // Strip anything after <<<END>>>
-  if (cleaned.includes("<<<END>>>")) {
-    cleaned = cleaned.split("<<<END>>>")[0] + "<<<END>>>";
+
+  if (cleaned.trim().startsWith("CONSTITUTION_VIOLATION:")) {
+    throw new Error(cleaned.trim());
   }
- 
-  // If no diff block exists at all, check if it looks like raw code
-  // and prepend it to the file as a fallback
-  if (!cleaned.includes("<<<FIND>>>") && !cleaned.includes("<<<REPLACE>>>")) {
-    // Strip any trailing prose after the last closing brace
-    const lastBrace = cleaned.lastIndexOf("}");
-    const codeOnly = lastBrace !== -1 ? cleaned.slice(0, lastBrace + 1) : cleaned;
-    console.log("No diff block found — treating output as raw code prepend");
-    return codeOnly + "\n\n" + originalContent;
+
+  // split into per-file blocks
+  const fileBlockRegex = /<<<FILE>>>\s*([\w./]+)\s*<<<FIND>>>([\s\S]*?)<<<REPLACE>>>([\s\S]*?)<<<END>>>/g;
+  const blocks = [];
+  let match;
+
+  while ((match = fileBlockRegex.exec(cleaned)) !== null) {
+    blocks.push({
+      filePath: match[1].trim(),
+      find: match[2],
+      replace: match[3]
+    });
   }
- 
-  const findMatch    = cleaned.match(/<<<FIND>>>([\s\S]*?)<<<REPLACE>>>/);
-  const replaceMatch = cleaned.match(/<<<REPLACE>>>([\s\S]*?)<<<END>>>/);
- 
-  if (!findMatch || !replaceMatch) {
-    throw new Error(
-      "Model did not return a valid diff block. " +
-      "Raw output: " + diffOutput.slice(0, 200)
-    );
+
+  if (blocks.length === 0) {
+    throw new Error("Model did not return any valid diff blocks. Raw output: " + diffOutput.slice(0, 200));
   }
- 
-  let findText    = findMatch[1];
-  let replaceText = replaceMatch[1];
- 
-  const isPlaceholder = findText.trim().startsWith("(") && findText.trim().endsWith(")");
-  const isExample     = findText.includes("copy the exact lines") || findText.includes("verbatim");
- 
-  if (findText.trim() === "" || isPlaceholder || isExample) {
-    return replaceText + originalContent;
-  }
- 
-  if (!originalContent.includes(findText)) {
-    throw new Error(
-      "Could not find the target text in the file. " +
-      "The model may have hallucinated lines that don't exist."
-    );
-  }
- 
-  return originalContent.replace(findText, replaceText);
+
+  return blocks; // returns array of {filePath, find, replace}
 }
+
  
 // /api/suggest, main self-modification endpoint
 // Expects: POST body { filePath: "public/app.js", instruction: "add dark mode toggle" }
