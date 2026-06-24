@@ -506,122 +506,223 @@ function applyDiff(originalContents, diffOutput) { //for multi-file diffs upddte
 // /api/suggest, main self-modification endpoint
 // Expects: POST body { filePath: "public/app.js", instruction: "add dark mode toggle" }
 // Returns: { success, message, backedUpTo } or { error }
+// app.post("/api/suggest", async (req, res) => {
+//   const { filePath, instruction } = req.body;
+ 
+//   // Basic input validation; both fields are required
+//   if (!filePath || !instruction || !instruction.trim()) {
+//     return res.status(400).json({ error: "filePath and instruction are required." });
+//   }
+ 
+//   // Resolve the absolute path now so we can use it consistently
+//   const absPath = path.resolve(PROJECT_ROOT, filePath);
+ 
+//   // Check the file actually exists before doing anything else.
+//   // fs.existsSync returns false if the file isn't there, no exception thrown.
+//   if (!fs.existsSync(absPath)) {
+//     return res.status(404).json({ error: `File not found: ${filePath}` });
+//   }
+ 
+//   // Read the current file contents. We pass these to the LLM so it knows
+//   // exactly what it's modifying. Without this context, the model would be
+//   // generating from scratch rather than making a targeted edit.
+//   const currentContents = fs.readFileSync(absPath, "utf8");
+ 
+//   let modifiedCode;
+//   try {
+//     // Call DeepSeek Coder with the Constitution + current file + instruction.
+//     // This is the async call to Ollama, it may take several seconds.
+//     modifiedCode = await generateCodeModification(
+//       instruction.trim(),
+//       currentContents,
+//       filePath
+//     );
+//   } catch (err) {
+//     console.error("DeepSeek error:", err.message);
+//     return res.status(502).json({ error: `Code model error: ${err.message}` });
+//   }
+ 
+ 
+//   //debug!!!
+//   console.log("=== DeepSeek raw output ===\n", modifiedCode, "\n=== end ===");
+ 
+ 
+//   // Check if the model refused due to a Constitution violation.
+//   // We told it to return "CONSTITUTION_VIOLATION" if the instruction
+//   // breaks the rules. This is our first check on the output.
+//   if (modifiedCode.trim().startsWith("CONSTITUTION_VIOLATION:")) {
+//     return res.status(400).json({
+//       error: modifiedCode.trim()
+//     });
+//   }
+ 
+//   // Apply the diff block the model returned to the original file content.
+//   // applyDiff() parses <<<FIND>>><<<REPLACE>>><<<END>>> and does the swap.
+//   // This happens BEFORE backup. if the diff is malformed we abort immediately
+//   // and nothing on disk is touched at all.
+//   let finalContent;
+//   try {
+//     finalContent = applyDiff(currentContents, modifiedCode);
+//   } catch (err) {
+//     return res.status(422).json({ error: `Diff error: ${err.message}` });
+//   }
+ 
+//   // For .js files, validate the patched result before writing anything to disk.
+//   // We validate finalContent (the patched file) not modifiedCode (the diff block).
+//   if (filePath.endsWith(".js")) {
+//     const validation = validateJS(finalContent);
+//     if (!validation.valid) {
+//       return res.status(422).json({
+//         error: `Result has syntax errors and was not written: ${validation.error}`
+//       });
+//     }
+//   }
+ 
+//   // Backup the file BEFORE writing. This is Layer 3 safety.
+//   let backupPath;
+//   try {
+//     backupPath = backupFile(absPath);
+//   } catch (err) {
+//     return res.status(500).json({ error: `Backup failed: ${err.message}` });
+//   }
+ 
+//   // Write the patched file. safeWrite does the Layer 2 path-scoping check.
+//   try {
+//     safeWrite(filePath, finalContent);
+//   } catch (err) {
+//     return res.status(403).json({ error: err.message });
+//   }
+ 
+//   console.log(`[suggest] Modified: ${filePath} | Backup: ${backupPath}`);
+ 
+//   res.json({
+//     success: true,
+//     message: `${filePath} updated successfully. Reload the page to see changes.`,
+//     backedUpTo: path.relative(PROJECT_ROOT, backupPath)
+//   });
+// });
+
+
+
+
 app.post("/api/suggest", async (req, res) => {
-  const { filePath, instruction } = req.body;
- 
-  // Basic input validation; both fields are required
-  if (!filePath || !instruction || !instruction.trim()) {
-    return res.status(400).json({ error: "filePath and instruction are required." });
+  const { instruction } = req.body;
+
+  if (!instruction || !instruction.trim()) {
+    return res.status(400).json({ error: "instruction is required." });
   }
- 
-  // Resolve the absolute path now so we can use it consistently
-  const absPath = path.resolve(PROJECT_ROOT, filePath);
- 
-  // Check the file actually exists before doing anything else.
-  // fs.existsSync returns false if the file isn't there, no exception thrown.
-  if (!fs.existsSync(absPath)) {
-    return res.status(404).json({ error: `File not found: ${filePath}` });
-  }
- 
-  // Read the current file contents. We pass these to the LLM so it knows
-  // exactly what it's modifying. Without this context, the model would be
-  // generating from scratch rather than making a targeted edit.
-  const currentContents = fs.readFileSync(absPath, "utf8");
- 
+
   let modifiedCode;
   try {
-    // Call DeepSeek Coder with the Constitution + current file + instruction.
-    // This is the async call to Ollama, it may take several seconds.
-    modifiedCode = await generateCodeModification(
-      instruction.trim(),
-      currentContents,
-      filePath
-    );
+    modifiedCode = await generateCodeModification(instruction.trim(), null, null);
   } catch (err) {
-    console.error("DeepSeek error:", err.message);
+    console.error("Claude error:", err.message);
     return res.status(502).json({ error: `Code model error: ${err.message}` });
   }
- 
- 
-  //debug!!!
-  console.log("=== DeepSeek raw output ===\n", modifiedCode, "\n=== end ===");
- 
- 
-  // Check if the model refused due to a Constitution violation.
-  // We told it to return "CONSTITUTION_VIOLATION" if the instruction
-  // breaks the rules. This is our first check on the output.
+
+  console.log("=== Claude raw output ===\n", modifiedCode, "\n=== end ===");
+
   if (modifiedCode.trim().startsWith("CONSTITUTION_VIOLATION:")) {
-    return res.status(400).json({
-      error: modifiedCode.trim()
-    });
+    return res.status(400).json({ error: modifiedCode.trim() });
   }
- 
-  // Apply the diff block the model returned to the original file content.
-  // applyDiff() parses <<<FIND>>><<<REPLACE>>><<<END>>> and does the swap.
-  // This happens BEFORE backup. if the diff is malformed we abort immediately
-  // and nothing on disk is touched at all.
-  let finalContent;
+
+  let blocks;
   try {
-    finalContent = applyDiff(currentContents, modifiedCode);
+    blocks = applyDiff(null, modifiedCode);
   } catch (err) {
     return res.status(422).json({ error: `Diff error: ${err.message}` });
   }
- 
-  // For .js files, validate the patched result before writing anything to disk.
-  // We validate finalContent (the patched file) not modifiedCode (the diff block).
-  if (filePath.endsWith(".js")) {
-    const validation = validateJS(finalContent);
-    if (!validation.valid) {
+
+  const appliedFiles = [];
+
+  for (const block of blocks) {
+    const blockAbsPath = path.resolve(PROJECT_ROOT, block.filePath);
+    const blockContents = fs.readFileSync(blockAbsPath, "utf8");
+
+    if (!blockContents.includes(block.find)) {
       return res.status(422).json({
-        error: `Result has syntax errors and was not written: ${validation.error}`
+        error: `Could not find target text in ${block.filePath}. Model may have hallucinated.`
       });
     }
+
+    const patched = blockContents.replace(block.find, block.replace);
+
+    if (block.filePath.endsWith(".js")) {
+      const validation = validateJS(patched);
+      if (!validation.valid) {
+        return res.status(422).json({
+          error: `Syntax error in ${block.filePath}: ${validation.error}`
+        });
+      }
+    }
+
+    backupFile(blockAbsPath);
+    safeWrite(block.filePath, patched);
+    appliedFiles.push(block.filePath);
   }
- 
-  // Backup the file BEFORE writing. This is Layer 3 safety.
-  let backupPath;
-  try {
-    backupPath = backupFile(absPath);
-  } catch (err) {
-    return res.status(500).json({ error: `Backup failed: ${err.message}` });
-  }
- 
-  // Write the patched file. safeWrite does the Layer 2 path-scoping check.
-  try {
-    safeWrite(filePath, finalContent);
-  } catch (err) {
-    return res.status(403).json({ error: err.message });
-  }
- 
-  console.log(`[suggest] Modified: ${filePath} | Backup: ${backupPath}`);
- 
+
+  console.log(`[suggest] Modified: ${appliedFiles.join(", ")}`);
+
   res.json({
     success: true,
-    message: `${filePath} updated successfully. Reload the page to see changes.`,
-    backedUpTo: path.relative(PROJECT_ROOT, backupPath)
+    message: `Modified: ${appliedFiles.join(", ")}. Reload the page to see changes.`,
+    backedUpTo: ".llm_backups/"
   });
 });
  
  
 
 // auto-triggers a UI change via the existing self-mod pipeline based on leaning
+// async function triggerCognitiveAdaptation(conversationId) {
+//   const profileRes = await fetch(`http://localhost:3000/api/cognitive-profile/${conversationId}`);
+//   const { leaning, sampleSize } = await profileRes.json();
+
+//   if (sampleSize < 5 || Math.abs(leaning) < 0.3) return; // not enough signal
+
+//   const instruction = leaning > 0
+//     ? "Add a numbered step-by-step breakdown panel to assistant responses, with each step collapsible"
+//     : "Add a summary/overview panel at the top of assistant responses, showing the key takeaway before details";
+
+//   const filePath = "public/app.js";
+//   const absPath = path.resolve(PROJECT_ROOT, filePath);
+//   const currentContents = fs.readFileSync(absPath, "utf8");
+
+//   let modifiedCode;
+//   try {
+//     modifiedCode = await generateCodeModification(instruction, currentContents, filePath);
+//   } catch (err) {
+//     console.error("Auto-adaptation failed:", err.message);
+//     return;
+//   }
+
+//   if (modifiedCode.trim().startsWith("CONSTITUTION_VIOLATION:")) return;
+
+//   let finalContent;
+//   try {
+//     finalContent = applyDiff(currentContents, modifiedCode);
+//   } catch (err) {
+//     console.error("Auto-adaptation diff error:", err.message);
+//     return;
+//   }
+
+//   const backupPath = backupFile(absPath);
+//   safeWrite(filePath, finalContent);
+//   console.log(`[auto-adapt] Modified ${filePath} based on leaning=${leaning}. Backup: ${backupPath}`);
+// }
+
 async function triggerCognitiveAdaptation(conversationId) {
   const profileRes = await fetch(`http://localhost:3000/api/cognitive-profile/${conversationId}`);
   const { leaning, sampleSize } = await profileRes.json();
 
-  if (sampleSize < 5 || Math.abs(leaning) < 0.3) return; // not enough signal
+  if (sampleSize < 5 || Math.abs(leaning) < 0.3) return;
 
   const instruction = leaning > 0
     ? "Add a numbered step-by-step breakdown panel to assistant responses, with each step collapsible"
     : "Add a summary/overview panel at the top of assistant responses, showing the key takeaway before details";
 
-  const filePath = "public/app.js";
-  const absPath = path.resolve(PROJECT_ROOT, filePath);
-  const currentContents = fs.readFileSync(absPath, "utf8");
-
   let modifiedCode;
   try {
-    modifiedCode = await generateCodeModification(instruction, currentContents, filePath);
+    modifiedCode = await generateCodeModification(instruction, null, null);
   } catch (err) {
     console.error("Auto-adaptation failed:", err.message);
     return;
@@ -629,18 +730,28 @@ async function triggerCognitiveAdaptation(conversationId) {
 
   if (modifiedCode.trim().startsWith("CONSTITUTION_VIOLATION:")) return;
 
-  let finalContent;
+  let blocks;
   try {
-    finalContent = applyDiff(currentContents, modifiedCode);
+    blocks = applyDiff(null, modifiedCode);
   } catch (err) {
     console.error("Auto-adaptation diff error:", err.message);
     return;
   }
 
-  const backupPath = backupFile(absPath);
-  safeWrite(filePath, finalContent);
-  console.log(`[auto-adapt] Modified ${filePath} based on leaning=${leaning}. Backup: ${backupPath}`);
+  for (const block of blocks) {
+    const blockAbsPath = path.resolve(PROJECT_ROOT, block.filePath);
+    const blockContents = fs.readFileSync(blockAbsPath, "utf8");
+    if (!blockContents.includes(block.find)) {
+      console.error(`[auto-adapt] Could not find target in ${block.filePath}`);
+      continue;
+    }
+    const patched = blockContents.replace(block.find, block.replace);
+    backupFile(blockAbsPath);
+    safeWrite(block.filePath, patched);
+    console.log(`[auto-adapt] Modified ${block.filePath} | leaning=${leaning}`);
+  }
 }
+
 
 
  // exports conversation as jsonl to fine tune a model

@@ -1,4 +1,3 @@
-
 const fetch = require("node-fetch");
 
 // CHAT MODEL (llama3.2):

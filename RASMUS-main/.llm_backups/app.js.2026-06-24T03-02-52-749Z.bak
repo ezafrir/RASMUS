@@ -195,127 +195,6 @@ async function continueConversation(prompt) {
 }
 
 // ─── UC2: Render a full conversation thread ───────────────────────────────────
-// ─── Step breakdown helpers ───────────────────────────────────────────────────
-function parseSteps(text) {
-  // Match lines that begin with a number followed by a period or closing paren
-  // e.g. "1. Do this" or "1) Do this"
-  const lines = text.split("\n");
-  const steps = [];
-  let currentStep = null;
-
-  lines.forEach(line => {
-    const match = line.match(/^(\d+)[.)]\s+(.+)/);
-    if (match) {
-      if (currentStep) steps.push(currentStep);
-      currentStep = { number: match[1], title: match[2], body: [] };
-    } else if (currentStep && line.trim() !== "") {
-      currentStep.body.push(line.trim());
-    } else if (currentStep && line.trim() === "" && currentStep.body.length > 0) {
-      currentStep.body.push("");
-    }
-  });
-  if (currentStep) steps.push(currentStep);
-  return steps;
-}
-
-function buildStepBreakdown(steps) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "step-breakdown";
-
-  const header = document.createElement("div");
-  header.className = "step-breakdown-header";
-  header.innerHTML = `<span class="step-breakdown-title">📋 Step-by-Step Breakdown</span>`;
-
-  const toggleAllBtn = document.createElement("button");
-  toggleAllBtn.className = "step-toggle-all-btn";
-  toggleAllBtn.textContent = "Expand All";
-  let allExpanded = false;
-  toggleAllBtn.addEventListener("click", () => {
-    allExpanded = !allExpanded;
-    wrapper.querySelectorAll(".step-item").forEach(item => {
-      item.classList.toggle("open", allExpanded);
-    });
-    toggleAllBtn.textContent = allExpanded ? "Collapse All" : "Expand All";
-  });
-  header.appendChild(toggleAllBtn);
-  wrapper.appendChild(header);
-
-  steps.forEach((step, idx) => {
-    const item = document.createElement("div");
-    item.className = "step-item";
-
-    const stepHeader = document.createElement("button");
-    stepHeader.className = "step-item-header";
-    stepHeader.setAttribute("aria-expanded", "false");
-    stepHeader.innerHTML = `
-      <span class="step-number">${step.number}</span>
-      <span class="step-title-text">${escapeHtml(step.title)}</span>
-      <span class="step-chevron">▸</span>
-    `;
-
-    const stepBody = document.createElement("div");
-    stepBody.className = "step-item-body";
-    if (step.body.length > 0) {
-      const bodyText = step.body.join("\n").trim();
-      stepBody.innerHTML = `<p>${escapeHtml(bodyText).replace(/\n/g, "<br>")}</p>`;
-    } else {
-      stepBody.innerHTML = `<p class="step-no-detail">No additional detail.</p>`;
-    }
-
-    stepHeader.addEventListener("click", () => {
-      const isOpen = item.classList.toggle("open");
-      stepHeader.setAttribute("aria-expanded", String(isOpen));
-      // Sync the expand-all button label
-      const allItems = wrapper.querySelectorAll(".step-item");
-      const openItems = wrapper.querySelectorAll(".step-item.open");
-      if (openItems.length === allItems.length) {
-        allExpanded = true;
-        toggleAllBtn.textContent = "Collapse All";
-      } else if (openItems.length === 0) {
-        allExpanded = false;
-        toggleAllBtn.textContent = "Expand All";
-      }
-    });
-
-    item.appendChild(stepHeader);
-    item.appendChild(stepBody);
-    wrapper.appendChild(item);
-  });
-
-  return wrapper;
-}
-
-function renderAssistantBubble(content) {
-  const bubble = document.createElement("div");
-  bubble.className = "message-bubble assistant-bubble";
-
-  const label = document.createElement("span");
-  label.className = "bubble-label";
-  label.textContent = "RASMUS";
-  bubble.appendChild(label);
-
-  const steps = parseSteps(content);
-
-  if (steps.length >= 2) {
-    // Show a short intro paragraph (text before the first step)
-    const firstStepIndex = content.search(/\d+[.)]\s+/);
-    const introPart = firstStepIndex > 0 ? content.slice(0, firstStepIndex).trim() : "";
-    if (introPart) {
-      const intro = document.createElement("p");
-      intro.className = "assistant-intro";
-      intro.textContent = introPart;
-      bubble.appendChild(intro);
-    }
-    bubble.appendChild(buildStepBreakdown(steps));
-  } else {
-    const p = document.createElement("p");
-    p.textContent = content;
-    bubble.appendChild(p);
-  }
-
-  return bubble;
-}
-
 function renderThread(conversation) {
   responseSection.innerHTML = "";
   threadSection.style.display = "block";
@@ -336,17 +215,13 @@ function renderThread(conversation) {
        ];
 
   messages.forEach(msg => {
-    if (msg.role === "assistant") {
-      threadMessages.appendChild(renderAssistantBubble(msg.content));
-    } else {
-      const bubble = document.createElement("div");
-      bubble.className = "message-bubble user-bubble";
-      bubble.innerHTML = `
-        <span class="bubble-label">You</span>
-        <p>${escapeHtml(msg.content)}</p>
-      `;
-      threadMessages.appendChild(bubble);
-    }
+    const bubble = document.createElement("div");
+    bubble.className = `message-bubble ${msg.role === "user" ? "user-bubble" : "assistant-bubble"}`;
+    bubble.innerHTML = `
+      <span class="bubble-label">${msg.role === "user" ? "You" : "RASMUS"}</span>
+      <p>${escapeHtml(msg.content)}</p>
+    `;
+    threadMessages.appendChild(bubble);
   });
 
   scrollToBottom();
