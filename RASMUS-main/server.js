@@ -781,7 +781,7 @@ async function triggerCognitiveAdaptation(conversationId) {
 // then we will push the exported .jsonl file into unsloth on google colab once i set it up... 
 // to fine-tune a Llama model on RASMUS's personality
  
-app.get("/api/conversations/export", (req, res) => {
+app.get("/api/export", (req, res) => {
   const lines = conversations
     .filter(c => c.messages && c.messages.length >= 2)
     .map(c => {
