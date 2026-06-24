@@ -10,14 +10,15 @@ Named after [Rasmus](https://comicsinfo.dk/rasmus.htm), a book I grew up loving 
 ## Project Description
 RASMUS is a web-based interface for interacting with a simulated LLM system.
 
-It features a self-modification system where RASMUS can rewrite its own frontend code based on the user's natural language instruction. 
+It features a self-modification system where RASMUS can rewrite its own UI based on how the user thinks! 
 
 ## Features
-- Multi-model routing: Conversation queries route towards Ollama 3.2 while code modification requests get sent to DeepSeek Coder. 
-- Self-modification pipeline: Users can describe UI changes in natural language, then the system reads the relevant source file, passes it to DeepSeek Coder along with the Constitution, validates the output, and writes the patch to the disk for it to be updated!
+- Cognitive style adaptation: Passively logs interaction signals (keyword patterns, phrasing) to infer sequential vs. global processing style. When a leaning threshold is crossed, RASMUS autonomously triggers a UI modification via the self-modification pipeline!
+- Multi-file self-modification pipeline: Users can describe UI changes in natural language. RASMUS sends all 3 frontend files to Claude Sonnet as context along with the Constitution, receives structured multi-file diff blocks, validates the outputs, and writes the patch to the disk for it to be updated!
+- Multi-model routing: Conversation queries route to Llama 3.2 (local via Ollama); code modification requests route to Claude Sonnet (Anthropic API).
 - 3-layered safety architecture: (1) Constitution (system prompt) constraining LLM behavior; (2) server-side path scoping that blocks writes outside allowed dirs; (3) automatically generated timestamped file backups before every write to the disk.
 - Diff-based code editing: model returns structured blocks instead of a full file regeneration. 
-- User system: A general purpose LLM interface for chatting and experimenting.
+
 
 ## How to Run the Project
 1. Install Ollama if not already downloaded: https://ollama.com/download
@@ -25,7 +26,10 @@ It features a self-modification system where RASMUS can rewrite its own frontend
    ollama pull llama3.2
 
    ollama pull deepseek-coder:6.7b
-2. Clone the repository:
+2. Add your Anthropic API key to a `.env` file in the project root:
+
+   ANTHROPIC_API_KEY=sk-ant-...
+3. Clone the repository:
 
    git clone https://github.com/ezafrir/RASMUS.git
 3. Navigate into the project folder:
