@@ -204,14 +204,38 @@ CONSTITUTION_VIOLATION: Your instruction violates the rules of this system and c
 const Anthropic = require("@anthropic-ai/sdk");
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+// async function generateCodeModification(instruction, fileContents, filePath) {
+//   console.log("Calling Anthropic API for code modification..."); //for debug
+//   const trimmedContents = fileContents.split("\n").slice(0, 100).join("\n");
+//   const userPrompt = `File: ${filePath}\n\nFile start:\n${trimmedContents}\n\nInstruction: ${instruction}`;
+
+//   const message = await client.messages.create({
+//     model: "claude-sonnet-4-6",
+//     max_tokens: 1024,
+//     system: CONSTITUTION,
+//     messages: [{ role: "user", content: userPrompt }]
+//   });
+
+//   return message.content[0].text;
+// }
+
 async function generateCodeModification(instruction, fileContents, filePath) {
-  console.log("Calling Anthropic API for code modification..."); //for debug
-  const trimmedContents = fileContents.split("\n").slice(0, 100).join("\n");
-  const userPrompt = `File: ${filePath}\n\nFile start:\n${trimmedContents}\n\nInstruction: ${instruction}`;
+  // fileContents and filePath are now ignored and we always send all the files
+    console.log("Calling Anthropic API for code modification..."); //for debug
+  const files = ["public/app.js", "public/index.html", "public/style.css"];
+  const fs = require("fs");
+  const path = require("path");
+
+  const fileBlocks = files.map(f => {
+    const contents = fs.readFileSync(path.resolve(__dirname, f), "utf8");
+    return `=== ${f} ===\n${contents}`;
+  }).join("\n\n");
+
+  const userPrompt = `${fileBlocks}\n\nInstruction: ${instruction}`;
 
   const message = await client.messages.create({
     model: "claude-sonnet-4-6",
-    max_tokens: 1024,
+    max_tokens: 4096, // update max tokens for multi-file diff blocks... we'll see how much money this costs lol
     system: CONSTITUTION,
     messages: [{ role: "user", content: userPrompt }]
   });
